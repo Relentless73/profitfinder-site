@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>ProfitFinder</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body { font-family: Arial, sans-serif; margin: 2rem; background: #f9f9f9; }
+    header { text-align: center; margin-bottom: 2rem; }
+    h1 { color: #2d8f7c; }
+    .result { margin-top: 2rem; padding: 1rem; background: #fff; border-radius: 6px; box-shadow: 0 2px 6px #eee; }
+    label, input { display: block; margin: 1rem auto; max-width: 300px; }
+    button { background: #2d8f7c; color: #fff; border: none; padding: 0.5rem 1.2rem; border-radius: 4px; cursor: pointer; }
+    button:hover { background: #24695d; }
+    .footer { text-align: center; margin-top: 3rem; font-size: 0.9rem; color: #888; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>ProfitFinder</h1>
+    <p>Quickly calculate your profit from sales!</p>
+  </header>
+  <form id="profitForm">
+    <label>
+      Revenue ($):
+      <input type="number" step="0.01" id="revenue" required>
+    </label>
+    <label>
+      Cost ($):
+      <input type="number" step="0.01" id="cost" required>
+    </label>
+    <button type="submit">Calculate Profit</button>
+  </form>
+  <div class="result" id="result" style="display:none;"></div>
+  <div class="footer">
+    &copy; 2025 ProfitFinder. Powered by GitHub Pages.
+  </div>
+  <script>
+    document.getElementById('profitForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const revenue = parseFloat(document.getElementById('revenue').value);
+      const cost = parseFloat(document.getElementById('cost').value);
+      if (isNaN(revenue) || isNaN(cost)) {
+        document.getElementById('result').innerText = "Please enter valid numbers!";
+        document.getElementById('result').style.display = "block";
+        return;
+      }
+      const profit = revenue - cost;
+      document.getElementById('result').innerHTML = `<strong>Your profit is: $${profit.toFixed(2)}</strong>`;
+      document.getElementById('result').style.display = "block";
+    });
+  </script>
+</body>
+</html>
