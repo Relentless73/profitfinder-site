@@ -10,6 +10,15 @@ function assert(condition, message) {
 
 try {
   await page.goto("http://127.0.0.1:3000", { waitUntil: "networkidle" });
+  await page.getByRole("heading", { name: "FlipProfit Deal Screening Bundle" }).waitFor({ timeout: 15_000 });
+  assert(await page.getByText("USD · one-time", { exact: true }).count() > 0, "Live product price was not displayed.");
+  const checkoutWindowPromise = page.waitForEvent("popup");
+  await page.getByRole("button", { name: "Buy the bundle" }).click();
+  const checkoutWindow = await checkoutWindowPromise;
+  await checkoutWindow.waitForURL(/myshopify\.com\/(cart\/c\/|checkouts\/)/, { timeout: 20_000 });
+  assert(checkoutWindow.url().includes("channel=online_store"), "Bundle checkout URL was not created for the storefront channel.");
+  await checkoutWindow.close();
+
   await page.getByLabel("Work order name").fill("Browser verification work order");
   await page.getByLabel("Expected sale price").fill("10000");
   await page.getByLabel("Buy price").fill("5000");

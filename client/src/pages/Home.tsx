@@ -17,11 +17,14 @@ import {
   RotateCcw,
   Save,
   ShieldCheck,
+  ShoppingBag,
   Trash2,
   TriangleAlert,
   WalletCards,
 } from "lucide-react";
 import { toast } from "sonner";
+import { useCart } from "@/contexts/CartContext";
+import { trpc } from "@/lib/trpc";
 import {
   blankDeal,
   buildLedgerCsv,
@@ -99,6 +102,10 @@ export default function Home() {
   const [values, setValues] = useState<DealValues>(blankDeal);
   const [savedDeals, setSavedDeals] = useState<SavedDeal[]>([]);
   const [selectedDealId, setSelectedDealId] = useState<string | null>(null);
+  const { buyNow, loading: checkoutLoading } = useCart();
+  const { data: bundle, isLoading: bundleLoading } = trpc.commerce.products.byHandle.useQuery({
+    handle: "flipprofit-deal-screening-bundle",
+  });
 
   const calculation = useMemo(() => calculateDeal(values), [values]);
   const agent = useMemo(() => reviewDeal(values, calculation), [values, calculation]);
@@ -196,6 +203,19 @@ export default function Home() {
 
   const scrollToGuide = () => document.getElementById("how-it-works")?.scrollIntoView({ behavior: "smooth" });
 
+  const startBundleCheckout = async () => {
+    const variant = bundle?.variants[0];
+    if (!variant?.availableForSale) {
+      toast.error("The bundle is not available for checkout right now.");
+      return;
+    }
+    try {
+      await buyNow(variant.id);
+    } catch {
+      toast.error("Checkout could not be started. Please try again.");
+    }
+  };
+
   const fieldTrace = [
     { label: "Expected sale price", value: values.expectedSalePrice },
     { label: "Buy price", value: values.buyPrice },
@@ -207,12 +227,13 @@ export default function Home() {
   return (
     <div className="app-shell">
       <aside className="tool-rail" aria-label="FlipProfit navigation">
-        <a className="brand-lockup" href="#top" aria-label="FlipProfit home">
+          <a className="brand-lockup" href="#top" aria-label="FlipProfit home">
           <img src={brandMark} alt="" />
           <span><b>FLIP</b>PROFIT</span>
         </a>
         <nav>
           <a className="rail-link active" href="#worksheet"><Calculator /> <span>Worksheet</span></a>
+          <a className="rail-link" href="#bundle"><ShoppingBag /> <span>Get bundle</span></a>
           <a className="rail-link" href="#agent-review"><Gauge /> <span>Deal agent</span></a>
           <a className="rail-link" href="#ledger"><ClipboardList /> <span>Local ledger</span></a>
           <a className="rail-link" href="#how-it-works"><Info /> <span>How it works</span></a>
@@ -255,6 +276,34 @@ export default function Home() {
           <div><span>02</span><b>Confirm the costs</b><small>Blank is not zero</small></div>
           <ChevronRight />
           <div><span>03</span><b>Review the decision</b><small>See the evidence</small></div>
+        </section>
+
+        <section id="bundle" className="bundle-strip" aria-labelledby="bundle-title">
+          {bundleLoading ? (
+            <div className="bundle-loading"><ShoppingBag /><span>Retrieving the live product listing…</span></div>
+          ) : bundle ? (
+            <>
+              <div className="bundle-visual">
+                {bundle.images[0] ? <img src={bundle.images[0].url} alt={bundle.images[0].altText || bundle.title} /> : <ShoppingBag aria-hidden="true" />}
+              </div>
+              <div className="bundle-copy">
+                <p className="eyebrow"><span /> LIVE DIGITAL BUNDLE</p>
+                <h2 id="bundle-title">{bundle.title}</h2>
+                <p>Get the blank, traceable Excel work order plus the printable field checklist. No account, subscription, fake pricing, or pre-filled deal data.</p>
+                <div className="bundle-trust"><ShieldCheck /> <span>Checkout uses the configured storefront. Your workbook contains only the facts you enter.</span></div>
+              </div>
+              <div className="bundle-purchase">
+                <strong>${Number(bundle.priceRange.min.amount).toFixed(2)}</strong>
+                <span>{bundle.priceRange.min.currencyCode} · one-time</span>
+                <button className="primary-button" disabled={!bundle.variants[0]?.availableForSale || checkoutLoading} onClick={startBundleCheckout}>
+                  <ShoppingBag /> {checkoutLoading ? "Opening checkout…" : "Buy the bundle"}
+                </button>
+                <small>Digital ZIP: Excel workbook + PDF checklist.</small>
+              </div>
+            </>
+          ) : (
+            <div className="bundle-loading"><TriangleAlert /><span>The product listing is not available at this moment. Please refresh or try again later.</span></div>
+          )}
         </section>
 
         <section id="worksheet" className="worksheet-section">

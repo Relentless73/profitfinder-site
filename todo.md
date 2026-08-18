@@ -12,5 +12,18 @@
 - [x] Add unit tests for calculations and agent rules.
 - [x] Run the type check, tests, and production build.
 - [x] Test the main interactions in the live app.
-- [ ] Copy the completed app into the selected GitHub repository, commit, and push it.
-- [ ] Create the required project checkpoint and deliver the finished build.
+- [x] Copy the completed app into the selected GitHub repository, commit, and push it.
+- [x] Create the required project checkpoint and deliver the finished build.
+- [x] Package this transparent agentic-product workflow as a reusable skill and validate it.
+- [ ] Define the first sellable FlipProfit bundle, price, delivery method, and launch copy without making income claims.
+- [ ] Identify the exact account or integration step needed to accept payment and deliver the product.
+- [ ] Create a real, blank FlipProfit deal-screening workbook and inspection checklist as the first paid digital bundle.
+- [ ] Add a live checkout and a buyer delivery path for the bundle.
+- [ ] Verify that a customer can reach the product page, start checkout, and receive the delivery instructions after purchase.
+- [ ] Create and publish the single FlipProfit digital bundle product in the configured storefront.
+- [ ] Verify the live storefront catalog and checkout session through the injected commerce integration.
+- [ ] Claim the storefront and enable its live payment provider so customers can complete real purchases.
+- [ ] Audit all current launch assets, checkout behavior, delivery path, and project status without requiring further user decisions.
+- [ ] Complete every customer fulfillment component available through the configured product, storefront, and storage tools.
+- [ ] Verify the buyer-facing product page and checkout-session creation against the live catalog.
+- [ ] Commit, push, checkpoint, and package all completed launch assets and the reusable workflow skill.
