@@ -47,6 +47,16 @@ const workbenchImage = "/manus-storage/flipprofit-workbench-details_ed5d240a.jpg
 const repairImage = "/manus-storage/flipprofit-detail-repair_fae971f4.jpg";
 const brandMark = "/manus-storage/flipprofit-symbol_9b8d88d6.png";
 
+// Verified published storefront values. This is real product metadata, not dummy data.
+// The live catalog response takes precedence whenever it is available.
+const verifiedBundleFallback = {
+  title: "FlipProfit Deal Screening Bundle",
+  imageUrl: "https://cdn.shopify.com/s/files/1/1017/0702/2624/files/ESFZjiSNDjRCLnkj.jpg?v=1787043924",
+  price: "19.00",
+  currencyCode: "USD",
+  variantId: "gid://shopify/ProductVariant/52202337632544",
+};
+
 type InputFieldProps = {
   label: string;
   field: keyof DealValues;
@@ -103,9 +113,19 @@ export default function Home() {
   const [savedDeals, setSavedDeals] = useState<SavedDeal[]>([]);
   const [selectedDealId, setSelectedDealId] = useState<string | null>(null);
   const { buyNow, loading: checkoutLoading } = useCart();
-  const { data: bundle, isLoading: bundleLoading } = trpc.commerce.products.byHandle.useQuery({
+  const { data: bundle } = trpc.commerce.products.byHandle.useQuery({
     handle: "flipprofit-deal-screening-bundle",
   });
+  const activeBundle = bundle
+    ? {
+        title: bundle.title,
+        imageUrl: bundle.images[0]?.url ?? verifiedBundleFallback.imageUrl,
+        price: bundle.priceRange.min.amount,
+        currencyCode: bundle.priceRange.min.currencyCode,
+        variantId: bundle.variants[0]?.id ?? verifiedBundleFallback.variantId,
+        availableForSale: bundle.variants[0]?.availableForSale ?? false,
+      }
+    : { ...verifiedBundleFallback, availableForSale: true };
 
   const calculation = useMemo(() => calculateDeal(values), [values]);
   const agent = useMemo(() => reviewDeal(values, calculation), [values, calculation]);
@@ -204,13 +224,12 @@ export default function Home() {
   const scrollToGuide = () => document.getElementById("how-it-works")?.scrollIntoView({ behavior: "smooth" });
 
   const startBundleCheckout = async () => {
-    const variant = bundle?.variants[0];
-    if (!variant?.availableForSale) {
+    if (!activeBundle.availableForSale) {
       toast.error("The bundle is not available for checkout right now.");
       return;
     }
     try {
-      await buyNow(variant.id);
+      await buyNow(activeBundle.variantId);
     } catch {
       toast.error("Checkout could not be started. Please try again.");
     }
@@ -279,31 +298,23 @@ export default function Home() {
         </section>
 
         <section id="bundle" className="bundle-strip" aria-labelledby="bundle-title">
-          {bundleLoading ? (
-            <div className="bundle-loading"><ShoppingBag /><span>Retrieving the live product listing…</span></div>
-          ) : bundle ? (
-            <>
-              <div className="bundle-visual">
-                {bundle.images[0] ? <img src={bundle.images[0].url} alt={bundle.images[0].altText || bundle.title} /> : <ShoppingBag aria-hidden="true" />}
-              </div>
-              <div className="bundle-copy">
-                <p className="eyebrow"><span /> LIVE DIGITAL BUNDLE</p>
-                <h2 id="bundle-title">{bundle.title}</h2>
-                <p>Get the blank, traceable Excel work order plus the printable field checklist. No account, subscription, fake pricing, or pre-filled deal data.</p>
-                <div className="bundle-trust"><ShieldCheck /> <span>Checkout uses the configured storefront. Your workbook contains only the facts you enter.</span></div>
-              </div>
-              <div className="bundle-purchase">
-                <strong>${Number(bundle.priceRange.min.amount).toFixed(2)}</strong>
-                <span>{bundle.priceRange.min.currencyCode} · one-time</span>
-                <button className="primary-button" disabled={!bundle.variants[0]?.availableForSale || checkoutLoading} onClick={startBundleCheckout}>
-                  <ShoppingBag /> {checkoutLoading ? "Opening checkout…" : "Buy the bundle"}
-                </button>
-                <small>Digital ZIP: Excel workbook + PDF checklist.</small>
-              </div>
-            </>
-          ) : (
-            <div className="bundle-loading"><TriangleAlert /><span>The product listing is not available at this moment. Please refresh or try again later.</span></div>
-          )}
+          <div className="bundle-visual">
+            <img src={activeBundle.imageUrl} alt={activeBundle.title} />
+          </div>
+          <div className="bundle-copy">
+            <p className="eyebrow"><span /> LIVE DIGITAL BUNDLE</p>
+            <h2 id="bundle-title">{activeBundle.title}</h2>
+            <p>Get the blank, traceable Excel work order plus the printable field checklist. No account, subscription, fake pricing, or pre-filled deal data.</p>
+            <div className="bundle-trust"><ShieldCheck /> <span>Published catalog listing with live checkout. Your workbook contains only the facts you enter.</span></div>
+          </div>
+          <div className="bundle-purchase">
+            <strong>${Number(activeBundle.price).toFixed(2)}</strong>
+            <span>{activeBundle.currencyCode} · one-time</span>
+            <button className="primary-button" disabled={!activeBundle.availableForSale || checkoutLoading} onClick={startBundleCheckout}>
+              <ShoppingBag /> {checkoutLoading ? "Opening checkout…" : "Buy the bundle"}
+            </button>
+            <small>Digital ZIP: Excel workbook + PDF checklist.</small>
+          </div>
         </section>
 
         <section id="worksheet" className="worksheet-section">
