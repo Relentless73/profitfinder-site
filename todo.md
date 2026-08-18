@@ -15,15 +15,16 @@
 - [x] Copy the completed app into the selected GitHub repository, commit, and push it.
 - [x] Create the required project checkpoint and deliver the finished build.
 - [x] Package this transparent agentic-product workflow as a reusable skill and validate it.
-- [ ] Define the first sellable FlipProfit bundle, price, delivery method, and launch copy without making income claims.
-- [ ] Identify the exact account or integration step needed to accept payment and deliver the product.
-- [ ] Create a real, blank FlipProfit deal-screening workbook and inspection checklist as the first paid digital bundle.
+- [x] Define the first sellable FlipProfit bundle, price, delivery method, and launch copy without making income claims.
+- [x] Identify the exact account or integration step needed to accept payment and deliver the product.
+- [x] Create a real, blank FlipProfit deal-screening workbook and inspection checklist as the first paid digital bundle.
 - [ ] Add a live checkout and a buyer delivery path for the bundle.
 - [ ] Verify that a customer can reach the product page, start checkout, and receive the delivery instructions after purchase.
-- [ ] Create and publish the single FlipProfit digital bundle product in the configured storefront.
-- [ ] Verify the live storefront catalog and checkout session through the injected commerce integration.
+- [x] Create and publish the single FlipProfit digital bundle product in the configured storefront.
+- [x] Verify the live storefront catalog and checkout session through the injected commerce integration.
 - [ ] Claim the storefront and enable its live payment provider so customers can complete real purchases.
-- [ ] Audit all current launch assets, checkout behavior, delivery path, and project status without requiring further user decisions.
+- [x] Audit all current launch assets, checkout behavior, delivery path, and project status without requiring further user decisions.
 - [ ] Complete every customer fulfillment component available through the configured product, storefront, and storage tools.
-- [ ] Verify the buyer-facing product page and checkout-session creation against the live catalog.
+- [x] Verify the buyer-facing product page and checkout-session creation against the live catalog.
+- [ ] Complete automatic buyer delivery after payment once merchant store ownership and payment activation are available.
 - [ ] Commit, push, checkpoint, and package all completed launch assets and the reusable workflow skill.

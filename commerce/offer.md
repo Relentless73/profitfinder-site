@@ -31,7 +31,7 @@
 
 ## Delivery promise
 
-The buyer receives the ZIP file containing the Excel workbook and PDF checklist immediately after successful checkout. The ZIP is approximately 17 KB and does not require an account or a subscription to use.
+The completed ZIP contains the Excel workbook and PDF checklist. Automatic post-payment download delivery must be activated in the merchant storefront before this offer is promoted as immediately downloadable. The ZIP is approximately 17 KB and does not require an account or a subscription to use.
 
 ## What it does not promise
 
