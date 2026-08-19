@@ -3,13 +3,14 @@ import { chromium } from "playwright";
 const browser = await chromium.launch({ headless: true });
 const page = await browser.newPage({ viewport: { width: 1280, height: 720 } });
 const failures = [];
+const baseUrl = process.env.BASE_URL || "http://127.0.0.1:3000";
 
 function assert(condition, message) {
   if (!condition) failures.push(message);
 }
 
 try {
-  await page.goto("http://127.0.0.1:3000", { waitUntil: "networkidle" });
+  await page.goto(baseUrl, { waitUntil: "networkidle" });
   await page.getByRole("heading", { name: "FlipProfit Deal Screening Bundle" }).waitFor({ timeout: 15_000 });
   assert(await page.getByText("USD · one-time", { exact: true }).count() > 0, "Live product price was not displayed.");
   const checkoutWindowPromise = page.waitForEvent("popup");
