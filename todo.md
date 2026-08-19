@@ -28,3 +28,4 @@
 - [x] Verify the buyer-facing product page and checkout-session creation against the live catalog.
 - [ ] Complete automatic buyer delivery after payment once merchant store ownership and payment activation are available.
 - [ ] Commit, push, checkpoint, and package all completed launch assets and the reusable workflow skill.
+- [x] Remove stale fallback Shopify checkout metadata, remove the unused calculator duplicate, and prove the live catalog is the only checkout source.

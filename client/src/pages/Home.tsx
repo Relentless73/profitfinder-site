@@ -23,6 +23,8 @@ import {
   WalletCards,
 } from "lucide-react";
 import { toast } from "sonner";
+import { useCart } from "@/contexts/CartContext";
+import { trpc } from "@/lib/trpc";
 import {
   blankDeal,
   buildLedgerCsv,
@@ -44,18 +46,6 @@ const heroImage = "/manus-storage/flipprofit-hero-auction-lot_0b45e1cd.jpg";
 const workbenchImage = "/manus-storage/flipprofit-workbench-details_ed5d240a.jpg";
 const repairImage = "/manus-storage/flipprofit-detail-repair_fae971f4.jpg";
 const brandMark = "/manus-storage/flipprofit-symbol_9b8d88d6.png";
-
-// Verified published storefront values. This is real product metadata, not dummy data.
-// The live catalog response takes precedence whenever it is available.
-const verifiedBundle = {
-  title: "FlipProfit Deal Screening Bundle",
-  imageUrl: "https://cdn.shopify.com/s/files/1/1017/0702/2624/files/ESFZjiSNDjRCLnkj.jpg?v=1787043924",
-  price: "19.00",
-  currencyCode: "USD",
-};
-
-// WarriorPlus offer 94166 / product 471964. The platform keeps purchases unavailable until its review is approved.
-const WARRIORPLUS_CHECKOUT_URL = "https://warriorplus.com/o2/buy/cw24tj/x7w97m/sj9zd1";
 
 type InputFieldProps = {
   label: string;
@@ -112,8 +102,20 @@ export default function Home() {
   const [values, setValues] = useState<DealValues>(blankDeal);
   const [savedDeals, setSavedDeals] = useState<SavedDeal[]>([]);
   const [selectedDealId, setSelectedDealId] = useState<string | null>(null);
-  const [checkoutLoading, setCheckoutLoading] = useState(false);
-  const activeBundle = verifiedBundle;
+  const { buyNow, loading: checkoutLoading } = useCart();
+  const { data: bundle } = trpc.commerce.products.byHandle.useQuery({
+    handle: "flipprofit-deal-screening-bundle",
+  });
+  const liveVariant = bundle?.variants.find(variant => variant.availableForSale);
+  const activeBundle = bundle && liveVariant
+    ? {
+        title: bundle.title,
+        imageUrl: bundle.images[0]?.url ?? "",
+        price: liveVariant.price.amount,
+        currencyCode: liveVariant.price.currencyCode,
+        variantId: liveVariant.id,
+      }
+    : null;
 
   const calculation = useMemo(() => calculateDeal(values), [values]);
   const agent = useMemo(() => reviewDeal(values, calculation), [values, calculation]);
@@ -211,11 +213,16 @@ export default function Home() {
 
   const scrollToGuide = () => document.getElementById("how-it-works")?.scrollIntoView({ behavior: "smooth" });
 
-  const startBundleCheckout = () => {
-    setCheckoutLoading(true);
-    const checkoutWindow = window.open(WARRIORPLUS_CHECKOUT_URL, "_blank", "noopener,noreferrer");
-    if (!checkoutWindow) window.location.assign(WARRIORPLUS_CHECKOUT_URL);
-    window.setTimeout(() => setCheckoutLoading(false), 800);
+  const startBundleCheckout = async () => {
+    if (!activeBundle) {
+      toast.error("The bundle is not available for checkout right now.");
+      return;
+    }
+    try {
+      await buyNow(activeBundle.variantId);
+    } catch {
+      toast.error("Checkout could not be started. Please try again.");
+    }
   };
 
   const fieldTrace = [
@@ -281,23 +288,33 @@ export default function Home() {
         </section>
 
         <section id="bundle" className="bundle-strip" aria-labelledby="bundle-title">
-          <div className="bundle-visual">
-            <img src={activeBundle.imageUrl} alt={activeBundle.title} />
-          </div>
-          <div className="bundle-copy">
-            <p className="eyebrow"><span /> LIVE DIGITAL BUNDLE</p>
-            <h2 id="bundle-title">{activeBundle.title}</h2>
-            <p>Get the blank, traceable Excel work order plus the printable field checklist. No account, subscription, fake pricing, or pre-filled deal data.</p>
-            <div className="bundle-trust"><ShieldCheck /> <span>Secure checkout and buyer delivery are provided through WarriorPlus. Your workbook contains only the facts you enter.</span></div>
-          </div>
-          <div className="bundle-purchase">
-            <strong>${Number(activeBundle.price).toFixed(2)}</strong>
-            <span>{activeBundle.currencyCode} · one-time</span>
-            <button className="primary-button" disabled={checkoutLoading} onClick={startBundleCheckout}>
-              <ShoppingBag /> {checkoutLoading ? "Opening checkout…" : "Buy the bundle"}
-            </button>
-            <small>Digital ZIP: Excel workbook + PDF checklist.</small>
-          </div>
+          {activeBundle ? (
+            <>
+              <div className="bundle-visual">
+                {activeBundle.imageUrl && <img src={activeBundle.imageUrl} alt={activeBundle.title} />}
+              </div>
+              <div className="bundle-copy">
+                <p className="eyebrow"><span /> LIVE DIGITAL BUNDLE</p>
+                <h2 id="bundle-title">{activeBundle.title}</h2>
+                <p>Get the blank, traceable Excel work order plus the printable field checklist. No account, subscription, fake pricing, or pre-filled deal data.</p>
+                <div className="bundle-trust"><ShieldCheck /> <span>Live catalog data is required before checkout can open.</span></div>
+              </div>
+              <div className="bundle-purchase">
+                <strong>${Number(activeBundle.price).toFixed(2)}</strong>
+                <span>{activeBundle.currencyCode} · one-time</span>
+                <button className="primary-button" disabled={checkoutLoading} onClick={startBundleCheckout}>
+                  <ShoppingBag /> {checkoutLoading ? "Opening checkout…" : "Buy the bundle"}
+                </button>
+                <small>Digital ZIP: Excel workbook + PDF checklist.</small>
+              </div>
+            </>
+          ) : (
+            <div className="bundle-copy">
+              <p className="eyebrow"><span /> PRODUCT STATUS</p>
+              <h2 id="bundle-title">Checkout is not shown yet.</h2>
+              <p>The free calculator remains available. A purchase button appears only after Shopify returns the live $19 bundle and its available sale variant.</p>
+            </div>
+          )}
         </section>
 
         <section id="worksheet" className="worksheet-section">
